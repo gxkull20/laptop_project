@@ -35,10 +35,12 @@ export function CartProvider({ children }) {
       .then(({ data, error }) => {
         if (!error && data) {
           setItems(
-            data.map((row) => ({
-              product: row.products,
-              quantity: row.quantity,
-            }))
+            data
+              .filter((row) => row.products)
+              .map((row) => ({
+                product: row.products,
+                quantity: row.quantity,
+              }))
           )
         }
         setLoading(false)
@@ -46,11 +48,15 @@ export function CartProvider({ children }) {
   }, [user])
 
   async function addToCart(product, quantity = 1) {
+    if (!product || !product.id) return
+    let newQty = quantity
+
     setItems((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id)
+      const existing = prev.find((i) => i.product && i.product.id === product.id)
       if (existing) {
+        newQty = existing.quantity + quantity
         return prev.map((i) =>
-          i.product.id === product.id ? { ...i, quantity: i.quantity + quantity } : i
+          i.product.id === product.id ? { ...i, quantity: newQty } : i
         )
       }
       return [...prev, { product, quantity }]
@@ -58,7 +64,7 @@ export function CartProvider({ children }) {
 
     if (isSupabaseConfigured && user) {
       await supabase.from('cart_items').upsert(
-        { user_id: user.id, product_id: product.id, quantity },
+        { user_id: user.id, product_id: product.id, quantity: newQty },
         { onConflict: 'user_id,product_id' }
       )
     }
@@ -96,8 +102,11 @@ export function CartProvider({ children }) {
     }
   }
 
-  const cartCount = items.reduce((sum, i) => sum + i.quantity, 0)
-  const cartTotal = items.reduce((sum, i) => sum + i.quantity * Number(i.product.price), 0)
+  const cartCount = items.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0)
+  const cartTotal = items.reduce(
+    (sum, i) => sum + (Number(i.quantity) || 0) * (Number(i.product?.price) || 0),
+    0
+  )
 
   return (
     <CartContext.Provider

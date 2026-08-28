@@ -38,7 +38,9 @@ export default function Products() {
     }
     if (filters.category) list = list.filter((p) => p.category === filters.category)
     if (filters.brand) list = list.filter((p) => p.brand === filters.brand)
-    if (filters.ram) list = list.filter((p) => p.ram?.startsWith(filters.ram))
+    if (filters.ram) {
+      list = list.filter((p) => p.ram && p.ram.toUpperCase().includes(filters.ram.toUpperCase()))
+    }
     list = list.filter((p) => Number(p.price) <= filters.maxPrice)
 
     switch (filters.sort) {

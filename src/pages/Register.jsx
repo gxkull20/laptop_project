@@ -26,13 +26,15 @@ export default function Register() {
 
     setStatus('loading')
     setError('')
-    const { error } = await register(form)
+    const { data, error } = await register(form)
     if (error) {
       setStatus('idle')
       setError(error)
-    } else {
+    } else if (data?.session) {
       setStatus('success')
-      navigate('/login')
+      navigate('/')
+    } else {
+      setStatus('confirmed_needed')
     }
   }
 
@@ -48,7 +50,21 @@ export default function Register() {
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        {status === 'confirmed_needed' ? (
+          <div className="mt-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-5 text-center">
+            <h3 className="font-display text-base font-600 text-emerald-400">Account Created!</h3>
+            <p className="mt-2 text-sm text-white/70">
+              Please check your email to confirm your account, then log in.
+            </p>
+            <Link
+              to="/login"
+              className="focus-ring mt-4 inline-block rounded-lg bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              Go to Login
+            </Link>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
             <label className="text-xs font-medium text-white/50">Full Name</label>
             <input

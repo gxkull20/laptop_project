@@ -29,20 +29,20 @@ export function AuthProvider({ children }) {
     if (!isSupabaseConfigured) {
       return { error: 'Connect Supabase (see .env.example) to enable real accounts.' }
     }
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: fullName } },
     })
-    return { error: error?.message ?? null }
+    return { data, error: error?.message ?? null }
   }
 
   async function login({ email, password }) {
     if (!isSupabaseConfigured) {
       return { error: 'Connect Supabase (see .env.example) to enable real accounts.' }
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error?.message ?? null }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    return { data, error: error?.message ?? null }
   }
 
   async function logout() {

@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
+import { Minus, Plus, Trash2, ShoppingBag, CheckCircle, ArrowRight } from 'lucide-react'
 import { useCart } from '../context/CartContext.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import { formatPrice } from '../utils/format.js'
@@ -7,7 +8,49 @@ import { formatPrice } from '../utils/format.js'
 const DELIVERY_FLAT = 19
 
 export default function Cart() {
-  const { items, updateQuantity, removeFromCart, cartTotal } = useCart()
+  const { items, updateQuantity, removeFromCart, clearCart, cartTotal } = useCart()
+  const [orderPlaced, setOrderPlaced] = useState(false)
+  const [checkingOut, setCheckingOut] = useState(false)
+
+  function handleCheckout() {
+    setCheckingOut(true)
+    setTimeout(() => {
+      setCheckingOut(false)
+      setOrderPlaced(true)
+      clearCart()
+    }, 800)
+  }
+
+  if (orderPlaced) {
+    return (
+      <div className="section mx-auto max-w-lg px-4 text-center">
+        <div className="rounded-3xl border border-white/8 bg-base-800/80 p-8 shadow-2xl">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+            <CheckCircle size={36} />
+          </div>
+          <h1 className="mt-4 font-display text-2xl font-700 text-white">Order Confirmed!</h1>
+          <p className="mt-2 text-sm text-white/60">
+            Thank you for your purchase. We are preparing your laptop order and will notify you when it ships.
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            <Link
+              to="/products"
+              className="focus-ring flex items-center justify-center gap-2 rounded-lg bg-brand-gradient px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Continue Shopping
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              to="/"
+              className="focus-ring text-sm text-white/50 hover:text-white"
+            >
+              Return to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (items.length === 0) {
     return (
@@ -101,9 +144,13 @@ export default function Cart() {
             </div>
           </div>
 
-          <button className="focus-ring mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-gradient px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90">
+          <button
+            onClick={handleCheckout}
+            disabled={checkingOut}
+            className="focus-ring mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-gradient px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+          >
             <ShoppingBag size={16} />
-            Checkout
+            {checkingOut ? 'Processing Order…' : 'Checkout'}
           </button>
           <Link
             to="/products"
