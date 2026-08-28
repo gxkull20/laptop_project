@@ -115,6 +115,7 @@ export default function Register() {
             {status === 'loading' ? 'Creating account…' : 'Register'}
           </button>
         </form>
+        )}
 
         <p className="mt-6 text-center text-sm text-white/50">
           Already have an account?{' '}
